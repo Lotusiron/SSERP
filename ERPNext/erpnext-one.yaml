@@ -73,10 +73,16 @@ services:
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
     image: ghcr.io/lotusiron/repo/custom:1.0.0
-    ports:
-      - "8080:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_default
+      - traefik.http.services.frontend.loadbalancer.server.port=8080
+      - traefik.http.routers.frontend-http.entrypoints=websecure
+      - traefik.http.routers.frontend-http.tls.certresolver=main-resolver
+      - traefik.http.routers.frontend-http.rule=Host(${SITES}) 
     networks:
       bench-network: null
+      traefik-proxy: null
     platform: linux/amd64
     pull_policy: always
     volumes:
@@ -189,6 +195,9 @@ networks:
     name: erpnext-one
   mariadb-network:
     name: mariadb-network
+    external: true
+  traefik-proxy:
+    name: traefik_default
     external: true
 volumes:
   redis-cache-data:
